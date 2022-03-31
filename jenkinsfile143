@@ -1,0 +1,21 @@
+node{
+
+def mavenHome = tool name: "Maven3.8.4"
+stage('checkout'){
+  git branch: 'development', credentialsId: '211e0574-8d5b-4814-9692-be617dd59a5e', url: 'https://github.com/Jk-fenner3/maven-web-application.git'
+}
+stage('build'){
+    sh "${mavenHome}/bin/mvn clean package"
+}
+stage('uploadthesonar'){
+    sh "${mavenHome}/bin/mvn sonar:sonar"
+}
+stage('uploadedthearitifactec'){
+    sh "${mavenHome}/bin/mvn deploy"
+}
+stage('uploadtomcat'){
+    sshagent(['6fcaa810-4007-4030-b748-6186ba917433']) {
+    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@3.110.210.191:/opt/apache-tomcat-9.0.60/webapps"
+}
+}
+}
